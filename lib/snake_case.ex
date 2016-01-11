@@ -1,6 +1,5 @@
 defmodule Battleships.Utils.Snakecase do
   def from_camel(s) do
-    IO.puts inspect(String.graphemes(s))
     s
     |> String.graphemes
     |> Enum.reduce([], &process_character/2)
