@@ -35,4 +35,11 @@ defmodule Battleships.Grid do
 
     !occupied
   end
+  # 
+  # def all_positions(%__MODULE__{bottom_right: bottom_right}) d
+  # end
+  #
+  # def as_ascii(%__MODULE__{bottom_right: bottom_right, contents: contents}) do
+  #
+  # end
 end
