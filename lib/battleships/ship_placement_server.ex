@@ -24,13 +24,16 @@ defmodule Battleships.ShipPlacementServer do
       |> Battleships.PlaceShips.for_game()
       |> Map.get(:contents)
       |> Enum.group_by(fn {positions, type} -> type end)
+
+    {:noreply, state |> Map.put(:original_placements, placements) |> Map.put(:awaiting_placement, placements)}
+  end
+
+  def handle_call({:get_proposed_positions}, _from, %{original_placements: placements} = state) do
+    result =
+      placements
       |> Enum.map(fn {ship_type, instances} -> {ship_type, Enum.map(instances, fn {positions, _} -> Enum.map(positions, &Battleships.Grid.Coordinate.format/1) end)} end)
       |> Enum.into %{}
 
-    {:noreply, state |> Map.put(:placements, placements)}
-  end
-
-  def handle_call({:get_proposed_positions}, _from, %{placements: placements} = state) do
-    {:reply, placements, state}
+    {:reply, result, state}
   end
 end
