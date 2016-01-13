@@ -8,7 +8,8 @@ defmodule Battleships do
 
     children = [
       # Start the endpoint when the application starts
-      supervisor(Battleships.Endpoint, []),
+      supervisor(Battleships.TournamentSupervisor, []),
+      supervisor(Battleships.Endpoint, [])
       # Here you could define other workers and supervisors as children
       # worker(Battleships.Worker, [arg1, arg2, arg3]),
     ]

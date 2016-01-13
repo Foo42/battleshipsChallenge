@@ -3,7 +3,7 @@ defmodule Battleships.GameController do
   use Battleships.Web, :controller
 
   def start(conn, params) do
-    Battleships.GameSupervisor.start_link [game_params: game_params(params), name: :game_supervisor]
+    Battleships.TournamentSupervisor.start_game :tournament_supervisor, [game_params: game_params(params)]
     Logger.info "returning"
     json conn, %{"foo" => 42}
   end

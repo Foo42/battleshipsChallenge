@@ -17,9 +17,10 @@ defmodule Battleships.Router do
     pipe_through :api
 
     post "/START", GameController, :start
+    get "/PLACE", PlacementController, :get_placement
 
     scope "/internals" do
-      get "/plannedpositions", GameController, :proposed_positions
+      get "/plannedpositions", PlacementController, :proposed_positions
     end
   end
 
