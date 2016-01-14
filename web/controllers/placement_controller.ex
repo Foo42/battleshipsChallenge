@@ -7,8 +7,8 @@ defmodule Battleships.PlacementController do
   def get_placement(conn, %{"type" => ship_type}) do
     {position_array, _} = ShipPlacementServer.pop_position :ship_placement_server, String.upcase(ship_type)
     orientation = case position_array do
-      [%Coordinate{x: x} | [%Coordinate{x: x}|_]] -> "vertical"
-      [%Coordinate{y: y} | [%Coordinate{y: y}|_]] -> "horizontal"
+      [%Coordinate{x: x} | [%Coordinate{x: x}|_]] -> "VERTICAL"
+      [%Coordinate{y: y} | [%Coordinate{y: y}|_]] -> "HORIZONTAL"
     end
     anchor = position_array |> Stream.map(&Coordinate.format/1) |> Enum.at 0
     json conn, %{"gridReference" => anchor, "orientation" => orientation}

@@ -8,13 +8,10 @@ defmodule Battleships.GameController do
     json conn, %{"foo" => 42}
   end
 
-  def place_ship(conn, params) do
-  end
-
-  def proposed_positions(conn, params) do
-    Logger.info("ship placement server at #{inspect GenServer.whereis(:ship_placement_server)}")
-    positions = Battleships.ShipPlacementServer.get_proposed_positions :ship_placement_server
-    json conn, positions
+  def confirm_ship_placements(conn, params) do
+    positions = params["gridReferences"] |> Enum.map &Battleships.Grid.Coordinate.parse/1
+    Logger.info "Ship confirmed position at #{inspect positions}"
+    json conn, %{}
   end
 
   defp game_params(params), do: params |> Enum.map(&map_param/1) |> Enum.reject(&(&1 == nil)) |> Enum.into(%{}) |> Battleships.GameParameters.from_dict
