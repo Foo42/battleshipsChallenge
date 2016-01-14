@@ -20,6 +20,8 @@ defmodule Battleships.Router do
     get "/PLACE", PlacementController, :get_placement
     post "/PLACE", GameController, :confirm_ship_placements
 
+    get "MOVE", GameController, :get_next_move
+
     scope "/internals" do
       get "/plannedpositions", PlacementController, :proposed_positions
     end
