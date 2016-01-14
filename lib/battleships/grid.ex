@@ -17,7 +17,7 @@ defmodule Battleships.Grid do
   def height(%__MODULE__{bottom_right: %{y: y}}), do: y+1
 
   def within?(%__MODULE__{bottom_right: %Coordinate{x: max_x, y: max_y}}, %Coordinate{x: x, y: y} = coordinate) do
-    x <= max_x && y <= max_y
+    x <= max_x && y <= max_y && x >= 0 && y >= 0
   end
 
   def random_coordinate(%__MODULE__{bottom_right: bottom_right}) do
@@ -35,7 +35,7 @@ defmodule Battleships.Grid do
 
     !occupied
   end
-  # 
+  #
   # def all_positions(%__MODULE__{bottom_right: bottom_right}) d
   # end
   #

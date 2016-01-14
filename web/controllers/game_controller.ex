@@ -26,6 +26,14 @@ defmodule Battleships.GameController do
     json conn, move
   end
 
+  def process_hit(conn, params), do: process_result(conn, params |> Map.put(:result, :hit))
+  def process_miss(conn, params), do: process_result(conn, params |> Map.put(:result, :miss))
+
+  defp process_result(conn, %{"attacker" => attacker, "gridReference" => grid_reference, result: result } = params) do
+    Battleships.Game.on_shot_result(:game, attacker, Coordinate.parse(grid_reference), result)
+    text conn, ""
+  end
+
   defp game_params(params), do: params |> Enum.map(&map_param/1) |> Enum.reject(&(&1 == nil)) |> Enum.into(%{}) |> Battleships.GameParameters.from_dict
 
   defp map_param({key, value}), do: {map_key(key), value}

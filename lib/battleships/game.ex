@@ -13,15 +13,60 @@ defmodule Battleships.Game do
   end
 
   def get_next_move(game), do: GenServer.call game, :get_next_move
+  def on_shot_result(game, attacker, grid_reference, result), do: GenServer.cast(game, {:on_shot_result, %{attacker: attacker, grid_reference: grid_reference, result: result}})
 
   #Implementation
   def init(parameters), do: {:ok, %__MODULE__{parameters: parameters, my_moves: Grid.new(parameters.grid_size)}}
 
-  def handle_call(message, from, %__MODULE__{mode: :placing} = state), do: handle_call(message, from, state |> Map.put(:mode, :playing))
-  def handle_call(:get_next_move, _from, state) do
+  def handle_call(message, from, %__MODULE__{mode: :placing} = state) do
+    Logger.info "leaving placing mode due to message #{inspect message}"
+    handle_call(message, from, state |> Map.put(:mode, :hunting))
+  end
+
+  def handle_call(:get_next_move, _from, %__MODULE__{mode: {:killing, killing_state}} = state) do
+    {shot, killing_state} = Battleships.Killing.next_move(killing_state)
+    updated_moves = state.my_moves |> Grid.add_item shot, :shot
+    Logger.info "attacking #{Coordinate.format(shot)}"
+    {:reply, %{type: :attack, grid_reference: shot}, %__MODULE__{state | my_moves: updated_moves, mode: {:killing, killing_state}}}
+  end
+
+  def handle_call(:get_next_move, _from, %__MODULE__{mode: :hunting} = state) do
     shot = Battleships.Grid.random_coordinate state.my_moves
     updated_moves = state.my_moves |> Grid.add_item shot, :shot
     Logger.info "attacking #{Coordinate.format(shot)}"
     {:reply, %{type: :attack, grid_reference: shot}, %__MODULE__{state | my_moves: updated_moves}}
+  end
+
+  def handle_cast({:on_shot_result, result}, %__MODULE__{all_move_results: previous_results} = state) do
+    state = case result.attacker do
+      "otpftw" ->
+        case result.result do
+          :hit -> hit_enemy(state, result)
+          :miss -> missed_enemy(state, result)
+        end
+      _ -> state
+    end
+
+    mode = case state.mode do
+      {:killing, nil} -> :hunting
+      other -> other
+    end
+
+    {:noreply, %__MODULE__{state | all_move_results: [result | previous_results], mode: mode}}
+  end
+
+  def hit_enemy(%__MODULE__{mode: :hunting} = state, %{grid_reference: coordinate}) do
+    Logger.info "entering killing mode"
+    %__MODULE__{state | mode: {:killing, Battleships.Killing.begin(coordinate, state.parameters)}}
+  end
+
+  def hit_enemy(%__MODULE__{mode: {:killing, killing_state}} = state, %{grid_reference: coordinate}) do
+    Logger.info "still in killing mode"
+    %__MODULE__{state | mode: {:killing, Battleships.Killing.hit_enemy(killing_state, coordinate)}}
+  end
+
+  def missed_enemy(%__MODULE__{mode: {:killing, killing_state}} = state, %{grid_reference: coordinate}) do
+    Logger.info "still in killing mode"
+    %__MODULE__{state | mode: {:killing, Battleships.Killing.missed_enemy(killing_state, coordinate)}}
   end
 end

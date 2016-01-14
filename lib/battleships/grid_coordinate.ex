@@ -37,6 +37,14 @@ defmodule Battleships.Grid.Coordinate do
   def right_of(%__MODULE__{x: x} = coord), do: Map.put(coord, :x, x+1)
   def down_from(%__MODULE__{y: y} = coord), do: Map.put(coord, :y, y+1)
 
+  def translate(%__MODULE__{x: x, y: y}, direction) do
+    case direction do
+      :up -> %__MODULE__{x: x, y: y-1}
+      :down -> %__MODULE__{x: x, y: y+1}
+      :left -> %__MODULE__{x: x-1, y: y}
+      :right -> %__MODULE__{x: x+1, y: y}
+    end
+  end
 
   def line_from(start, :right, length) do
     start |> Stream.iterate(&right_of/1) |> Enum.take(length)
