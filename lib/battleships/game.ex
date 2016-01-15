@@ -34,7 +34,11 @@ defmodule Battleships.Game do
   end
 
   def handle_call(:get_next_move, _from, %__MODULE__{mode: :hunting} = state) do
-    shot = Battleships.Grid.random_coordinate state.my_moves
+    shot =
+      Stream.repeatedly(fn -> Battleships.Grid.random_coordinate(state.my_moves)end)
+      |> Stream.filter(&Battleships.Grid.coordinate_empty?(state.my_moves, &1))
+      |> Enum.at(0)
+
     updated_moves = state.my_moves |> Grid.add_item shot, :shot
     Logger.info "attacking #{Coordinate.format(shot)}"
     {:reply, %{type: :attack, grid_reference: shot}, %__MODULE__{state | my_moves: updated_moves}}
