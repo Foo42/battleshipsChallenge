@@ -11,6 +11,12 @@ defmodule Battleships.TournamentSupervisor do
   def start_game(supervisor, params) do
     Logger.info "#{__MODULE__} starting a child GameSupervisor with params #{inspect params}"
     params = Keyword.merge([name: :game_supervisor], params)
+    case GenServer.whereis(Keyword.fetch!(params, :name)) do
+      nil -> Logger.info "No previous game supervisor found with name #{inspect Keyword.fetch!(params, :name)}"
+      pid ->
+        :ok = Supervisor.terminate_child(supervisor, pid)
+        Logger.info "previous game supervisor with name #{inspect Keyword.fetch!(params, :name)} was terminated"
+    end
     Supervisor.start_child supervisor, [params]
   end
 
