@@ -13,7 +13,7 @@ defmodule Battleships.Hunting do
   def random_unused_coordinate(previous_shot_grid) do
       Stream.repeatedly(fn -> Grid.random_coordinate(previous_shot_grid)end)
       |> Stream.filter(&Grid.coordinate_empty?(previous_shot_grid, &1))
-      |> Stream.each(&Logger.info("proposing shot at #{Coordinate.format(&1)} with previous of #{inspect(Enum.map(previous_shot_grid.contents,fn {[pos|_],_} -> Coordinate.format(pos)end))}"))
+      # |> Stream.each(&Logger.info("proposing shot at #{Coordinate.format(&1)} with previous of #{inspect(Enum.map(previous_shot_grid.contents,fn {[pos|_],_} -> Coordinate.format(pos)end))}"))
   end
 
   def random_unused_coordinate(previous_shot_grid, [with_clearance_of: clearance, max_tries: max_tries]) do

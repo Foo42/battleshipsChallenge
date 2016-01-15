@@ -35,13 +35,7 @@ defmodule Battleships.Game do
   end
 
   def handle_call(:get_next_move, _from, %__MODULE__{mode: :hunting} = state) do
-    # possible_shots = Hunting.random_unused_coordinate(state.my_moves)
     shot = Hunting.suggest_shot(state.my_moves)
-    # shot =
-    #   Stream.take(Stream.filter(possible_shots, &coordinate_is_clear_to(state.my_moves, &1, 2)), 20)
-    #   |> Stream.concat(Stream.take(possible_shots, 50))
-    #   |> Stream.concat(Stream.filter(Grid.coordinates(state.my_moves), &Grid.coordinate_empty?(&1)))
-    #   |> Enum.at(0)
 
     updated_moves = state.my_moves |> Grid.add_item shot, :shot
     Logger.info "attacking #{Coordinate.format(shot)}"
