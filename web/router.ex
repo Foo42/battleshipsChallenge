@@ -23,6 +23,7 @@ defmodule Battleships.Router do
     get "MOVE", GameController, :get_next_move
     post "/HIT", GameController, :process_hit
     post "/MISS", GameController, :process_miss
+    post "/HIT_MINE", GameController, :process_miss
 
     scope "/internals" do
       get "/plannedpositions", PlacementController, :proposed_positions
