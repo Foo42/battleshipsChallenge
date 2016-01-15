@@ -23,11 +23,14 @@ defmodule Battleships.Game do
     handle_call(message, from, state |> Map.put(:mode, :hunting))
   end
 
-  def handle_call(:get_next_move, _from, %__MODULE__{mode: {:killing, killing_state}} = state) do
-    {shot, killing_state} = Battleships.Killing.next_move(killing_state)
-    updated_moves = state.my_moves |> Grid.add_item shot, :shot
-    Logger.info "attacking #{Coordinate.format(shot)}"
-    {:reply, %{type: :attack, grid_reference: shot}, %__MODULE__{state | my_moves: updated_moves, mode: {:killing, killing_state}}}
+  def handle_call(:get_next_move, from, %__MODULE__{mode: {:killing, killing_state}} = state) do
+    case Battleships.Killing.next_move(killing_state) do
+      {shot, killing_state} ->
+        updated_moves = state.my_moves |> Grid.add_item shot, :shot
+        Logger.info "attacking #{Coordinate.format(shot)}"
+        {:reply, %{type: :attack, grid_reference: shot}, %__MODULE__{state | my_moves: updated_moves, mode: {:killing, killing_state}}}
+      nil -> handle_call(:get_next_move, from, %__MODULE__{state | mode: :hunting})
+    end
   end
 
   def handle_call(:get_next_move, _from, %__MODULE__{mode: :hunting} = state) do
@@ -68,5 +71,10 @@ defmodule Battleships.Game do
   def missed_enemy(%__MODULE__{mode: {:killing, killing_state}} = state, %{grid_reference: coordinate}) do
     Logger.info "still in killing mode"
     %__MODULE__{state | mode: {:killing, Battleships.Killing.missed_enemy(killing_state, coordinate)}}
+  end
+
+  def missed_enemy(%__MODULE__{mode: :hunting} = state, %{grid_reference: coordinate}) do
+    Logger.info "still in hunting mode"
+    state
   end
 end
