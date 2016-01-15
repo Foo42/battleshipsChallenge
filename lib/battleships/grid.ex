@@ -7,9 +7,7 @@ defmodule Battleships.Grid do
   # Maybe should be a sort of 2d array structure for storing other things in? Then we could have a different "grid" for each of those types of content?
   def new(%Coordinate{} = bottom_right), do: struct(__MODULE__, %{bottom_right: bottom_right})
   def new(size) when is_binary(size), do: new(Coordinate.parse(size))
-  # def random_coordinate(%__MODULE__{size: size}) do
-  #
-  # end
+
   def add_item(%__MODULE__{} = grid, %Coordinate{} = position, item), do: add_item(grid, [position], item)
   def add_item(%__MODULE__{} = grid, positions, item) when is_list(positions), do: Map.put(grid, :contents, [{positions, item} | grid.contents])
 
@@ -34,6 +32,12 @@ defmodule Battleships.Grid do
       |> Enum.any? &(&1 == coordinate)
 
     !occupied
+  end
+
+
+  def coordinates(%__MODULE__{bottom_right: %Coordinate{x: max_x, y: max_y}}) do
+    0..max_x
+    |> Stream.map(fn x -> Stream.map(0..max_y, fn y -> %Coordinate{x: x, y: y} end) end)
   end
   #
   # def all_positions(%__MODULE__{bottom_right: bottom_right}) d

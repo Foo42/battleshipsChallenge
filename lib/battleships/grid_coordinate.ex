@@ -54,6 +54,23 @@ defmodule Battleships.Grid.Coordinate do
     start |> Stream.iterate(&down_from/1) |> Enum.take(length)
   end
 
+  def cross_around(point, length) do
+    directions = [:up, :right, :down, :left]
+    directions
+    |> Enum.flat_map(
+      fn direction ->
+        Stream.iterate(point, &translate(&1, direction))
+        |> Stream.drop(1)
+        |> Enum.take(length) end)
+  end
+
+  def orientation(coordinates) when is_list(coordinates) do
+    orientation = case coordinates do
+      [%__MODULE__{x: x} | [%__MODULE__{x: x}|_]] -> :vertical
+      [%__MODULE__{y: y} | [%__MODULE__{y: y}|_]] -> :horizontal
+    end
+  end
+
   defp value_of_char(char), do: (char - ?a) + 1
   defp value_of_char_in_position(char, position), do: value_of_char(char) * round(:math.pow(26,position))
 end

@@ -33,4 +33,10 @@ defmodule Battleships.Grid.CoordinateTests do
     line_down = Coordinate.line_from(%Coordinate{x: 0, y: 0}, :down, 3)
     assert line_down == [%Coordinate{x: 0, y: 0}, %Coordinate{x: 0, y: 1}, %Coordinate{x: 0, y: 2}]
   end
+
+  test "cross_around should return a cross of coordinates with specified arm length" do
+    centre = Coordinate.parse("C3")
+    cross = Coordinate.cross_around centre, 2
+    assert cross |> Enum.map(&Coordinate.format/1) == ["C2", "C1", "D3", "E3", "C4", "C5", "B3", "A3"]
+  end
 end

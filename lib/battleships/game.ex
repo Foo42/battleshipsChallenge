@@ -1,5 +1,6 @@
 defmodule Battleships.Game do
   alias Battleships.Grid
+  alias Battleships.Hunting
   alias Battleships.Grid.Coordinate
   use GenServer
   require Logger
@@ -34,10 +35,13 @@ defmodule Battleships.Game do
   end
 
   def handle_call(:get_next_move, _from, %__MODULE__{mode: :hunting} = state) do
-    shot =
-      Stream.repeatedly(fn -> Battleships.Grid.random_coordinate(state.my_moves)end)
-      |> Stream.filter(&Battleships.Grid.coordinate_empty?(state.my_moves, &1))
-      |> Enum.at(0)
+    # possible_shots = Hunting.random_unused_coordinate(state.my_moves)
+    shot = Hunting.suggest_shot(state.my_moves)
+    # shot =
+    #   Stream.take(Stream.filter(possible_shots, &coordinate_is_clear_to(state.my_moves, &1, 2)), 20)
+    #   |> Stream.concat(Stream.take(possible_shots, 50))
+    #   |> Stream.concat(Stream.filter(Grid.coordinates(state.my_moves), &Grid.coordinate_empty?(&1)))
+    #   |> Enum.at(0)
 
     updated_moves = state.my_moves |> Grid.add_item shot, :shot
     Logger.info "attacking #{Coordinate.format(shot)}"
@@ -51,7 +55,7 @@ defmodule Battleships.Game do
           :hit -> hit_enemy(state, result)
           :miss -> missed_enemy(state, result)
         end
-      _ -> state
+      _opponent -> state
     end
 
     mode = case state.mode do
